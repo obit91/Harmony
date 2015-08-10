@@ -7,9 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.List;
+import java.io.File;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -28,7 +27,8 @@ import uk.co.caprica.vlcj.player.list.MediaListPlayerMode;
  * player.
  */
 public class TestMediaListEmbeddedPlayer {
-
+	
+	private static String folderPath = "C:\\temp";
 	
     public static void main(String[] args) throws Exception {
     	
@@ -54,7 +54,21 @@ public class TestMediaListEmbeddedPlayer {
 
         mediaListPlayer.setMediaPlayer(mediaPlayer); // <--- Important, associate the media player with the media list player
                 
-        JPanel cp = new JPanel();
+        initPanels(canvas, mediaPlayer, mediaListPlayer);
+
+        MediaList mediaList = mediaPlayerFactory.newMediaList();
+        Stream(folderPath,mediaList);
+
+        mediaListPlayer.setMediaList(mediaList);
+        mediaListPlayer.setMode(MediaListPlayerMode.LOOP);
+
+//        mediaListPlayer.play();
+    }
+
+	private static void initPanels(Canvas canvas,
+			final EmbeddedMediaPlayer mediaPlayer,
+			final MediaListPlayer mediaListPlayer) {
+		JPanel cp = new JPanel();
         cp.setBackground(Color.black);
         cp.setLayout(new BorderLayout());
         cp.add(canvas, BorderLayout.CENTER);
@@ -79,40 +93,21 @@ public class TestMediaListEmbeddedPlayer {
         initButtons(mediaPlayer, mediaListPlayer, f);
         
         f.setVisible(true);
-
-        MediaList mediaList = mediaPlayerFactory.newMediaList();
-        String[] options = {};
-        mediaList.addMedia("C:\\Users\\Public\\Videos\\Sample Videos\\Wildlife.wmv", options);
-        mediaList.addMedia("C:\\Users\\Public\\Videos\\Sample Videos\\SampleVideo_1080x720_1mb.mp4", options);
-
-        mediaListPlayer.setMediaList(mediaList);
-        mediaListPlayer.setMode(MediaListPlayerMode.LOOP);
-
-        mediaListPlayer.play();
-                
-        // This looping is just for purposes of demonstration, ordinarily you would
-        // not do this of course
-//        for(;;) {
-//            Thread.sleep(500);
-//            mediaPlayer.setChapter(3);
-//
-//            Thread.sleep(5000);
-//            mediaListPlayer.playNext();
-//        }
-
-        //    mediaList.release();
-        //    mediaListPlayer.release();
-        //    mediaPlayer.release();
-        //    mediaPlayerFactory.release();
-    }
+	}
 
 	private static void initButtons(final EmbeddedMediaPlayer mediaPlayer, final MediaListPlayer mediaListPlayer,
 			JFrame f) {
 		JButton pauseButton;
         JButton nextButton;
         JButton prevButton;
+        JButton playButton;
+        JButton stopButton;
         
         JPanel controlsPane = new JPanel();
+        playButton = new JButton("Play");
+        controlsPane.add(playButton);
+        stopButton = new JButton("Stop");
+        controlsPane.add(stopButton);
         pauseButton = new JButton("Pause");
         controlsPane.add(pauseButton);
         nextButton = new JButton("Next");
@@ -137,5 +132,25 @@ public class TestMediaListEmbeddedPlayer {
             	mediaListPlayer.playPrevious();
             }
         });
+        playButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            	mediaListPlayer.play();
+            }
+        });
+        stopButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            	mediaListPlayer.stop();
+            }
+        });
+	}
+	
+	public static void Stream(String FOLDER_PATH, MediaList mediaList){        
+
+	    File myDir = new File(FOLDER_PATH);
+	    File[] files = myDir.listFiles(); 
+
+	    if(myDir.exists() && myDir.isDirectory())
+	    	for (int i=0; i < files.length ; i++)                                 
+	    	   mediaList.addMedia(files[i].getPath());     
 	}
 }
